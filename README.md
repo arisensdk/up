@@ -1,4 +1,4 @@
-# eosup
+# arisenup
 
 This package installs an executable for managing your local
 ARISEN testnet from Docker, as well as for compiling ARISEN
@@ -12,13 +12,13 @@ the executable from your `package.json` scripts section.
 
 ### Globally
 
-Install globally with `npm install -g eosup`. Then simply
-run `eosup` anywhere.
+Install globally with `npm install -g arisenup`. Then simply
+run `arisenup` anywhere.
 
 ### Inside a project
 
 Install as a dependency of your project with `npm install @arisensdk/up`.
-Then, run `eosup` from your `package.json` scripts, like this:
+Then, run `arisenup` from your `package.json` scripts, like this:
 
 ```json
 "scripts": {
@@ -29,17 +29,17 @@ Then, run `eosup` from your `package.json` scripts, like this:
 
 ## Usage
 
-Run `eosup --help` to get info on the specific commands
+Run `arisenup --help` to get info on the specific commands
 and options.
 
 In the current version, this tool uses:
 
-- [ARISEN/eos](https://github.com/ARISEN/eos) version 1.0.0
+- [ARISEN/rsn](https://github.com/ARISEN/rsn) version 1.0.0
 - [ARISEN/arisen.cdt](https://github.com/ARISEN/arisen.cdt) version 1.0.0
 
 PeepsLabs doesn't provide the packages
 in a package registry that allows for simple version selection yet,
-so for using other versions, a new release of eosup will be
+so for using other versions, a new release of arisenup will be
 necessary. Please open an issue in this repository if you require
 such update.
 

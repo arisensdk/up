@@ -3,18 +3,18 @@ import es from 'event-stream'
 import path from 'path'
 
 import { Writable } from 'stream'
-import EosUp from './eosup'
+import ArisenUp from './arisenup'
 import imageTag from './imageTag'
 
 export default class Testnet extends Dockerator {
   public operational: boolean
-  public eosup: EosUp
+  public arisenup: ArisenUp
   private markOperational?: () => void
 
   constructor({
     printOutput = false,
     extraParams = '',
-    eosup = new EosUp()
+    arisenup = new ArisenUp()
   } = {}) {
     const stdout = (es.mapSync((data: string) => {
       if (!this.operational) {
@@ -40,14 +40,14 @@ export default class Testnet extends Dockerator {
       command: [
         'bash',
         '-c',
-        `nodeos -e -p eosio -d /mnt/dev/data \
+        `aos -e -p arisen -d /mnt/dev/data \
         --config-dir /mnt/dev/config \
         --http-validate-host=false \
         --disable-replay-opts \
-        --plugin eosio::producer_plugin \
-        --plugin eosio::state_history_plugin \
-        --plugin eosio::http_plugin \
-        --plugin eosio::chain_api_plugin \
+        --plugin arisen::producer_plugin \
+        --plugin arisen::state_history_plugin \
+        --plugin arisen::http_plugin \
+        --plugin arisen::chain_api_plugin \
         --http-server-address=0.0.0.0:8888 \
         --state-history-endpoint=0.0.0.0:8080 \
         --access-control-allow-origin=* \
@@ -59,7 +59,7 @@ export default class Testnet extends Dockerator {
       stdio: { stdout }
     })
     this.operational = false
-    this.eosup = eosup
+    this.arisenup = arisenup
   }
 
   public async setup() {
@@ -82,7 +82,7 @@ export default class Testnet extends Dockerator {
           resolve()
         }
       })
-      await this.eosup.loadSystemContracts()
+      await this.arisenup.loadSystemContracts()
     } catch (error) {
       await this.stop()
       throw error

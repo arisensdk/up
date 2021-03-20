@@ -1,5 +1,5 @@
 import Compiler from './compiler'
-import EosUp from './eosup'
+import ArisenUp from './arisenup'
 import Testnet from './testnet'
 
-export { EosUp, Testnet, Compiler }
+export { ArisenUp, Testnet, Compiler }

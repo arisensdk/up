@@ -46,7 +46,7 @@ prog
   .option('-c, --contract <name>', 'Contract name, for ABI generation.')
   .option(
     '-e, --extra-params <params>',
-    'String with additional command parameters to forward to eosio-cpp.'
+    'String with additional command parameters to forward to arisen-cpp.'
   )
   .action(
     wrapAsync(async (args, opts, logger) => {
@@ -59,10 +59,10 @@ prog
       })
     })
   )
-  .command('testnet', 'Run a local eosio testnet for development.')
+  .command('testnet', 'Run a local ARISEN testnet for development.')
   .option(
     '-e, --extra-params <params>',
-    'String with additional command parameters to forward to nodeos.'
+    'String with additional command parameters to forward to aos.'
   )
   .option(
     '-c, --callback <command>',
@@ -76,7 +76,7 @@ prog
   )
   .option(
     '-q, --quiet',
-    'Do not print nodeos output to stdout.',
+    'Do not print aos output to stdout.',
     prog.BOOLEAN,
     false
   )

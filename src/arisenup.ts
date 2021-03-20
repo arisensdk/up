@@ -3,16 +3,16 @@
 import fs from 'fs'
 import path from 'path'
 
-import { Api, JsonRpc, Serialize } from 'eosjs'
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig'
+import { Api, JsonRpc, Serialize } from 'arisensdk'
+import { JsSignatureProvider } from 'arisensdk/dist/arisensdk-jssig'
 import fetch from 'node-fetch'
 import { TextDecoder, TextEncoder } from 'util'
 
-import { FlexAuth, Morpheos, Transaction } from 'morpheos'
+import { FlexAuth, Horizon, Transaction } from 'arisensdk@horizon'
 
 import Compiler from './compiler'
 
-export default class EosUp {
+export default class ArisenUp {
   public static keypair = {
     public: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
     private: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
@@ -40,15 +40,15 @@ export default class EosUp {
     })
   }
 
-  public morph: Morpheos
+  public izon: Horizon
 
-  constructor({ eos }: { eos?: Api | Morpheos } = {}) {
-    if (eos) {
-      this.morph = new Morpheos(eos)
+  constructor({ rsn }: { rsn?: Api | Horizon } = {}) {
+    if (rsn) {
+      this.izon = new Horizon(rsn)
     } else {
-      const signatureProvider = new JsSignatureProvider([EosUp.keypair.private])
+      const signatureProvider = new JsSignatureProvider([ArisenUp.keypair.private])
       const rpc = new JsonRpc('http://localhost:8888', { fetch })
-      this.morph = new Morpheos(
+      this.izon = new Horizon(
         new Api({
           rpc,
           signatureProvider,
@@ -59,24 +59,24 @@ export default class EosUp {
     }
   }
 
-  public async createAccount(name: string, publicKey = EosUp.keypair.public) {
+  public async createAccount(name: string, publicKey = ArisenUp.keypair.public) {
     const auth = {
       threshold: 1,
       keys: [{ weight: 1, key: publicKey }],
       accounts: [],
       waits: []
     }
-    return this.morph.transact({
-      account: 'eosio',
+    return this.izon.transact({
+      account: 'arisen',
       name: 'newaccount',
       authorization: [
         {
-          actor: 'eosio',
+          actor: 'arisen',
           permission: 'active'
         }
       ],
       data: {
-        creator: 'eosio',
+        creator: 'arisen',
         name,
         owner: auth,
         active: auth
@@ -95,7 +95,7 @@ export default class EosUp {
     )
 
     const abi: { [key: string]: any } = JSON.parse((abiBuffer as any) as string)
-    const abiDefinition = this.morph.eos.abiTypes.get('abi_def')
+    const abiDefinition = this.izon.rsn.abiTypes.get('abi_def')
     if (!abiDefinition) {
       throw new Error('Missing ABI definition')
     }
@@ -107,14 +107,14 @@ export default class EosUp {
     }
 
     const buffer = new Serialize.SerialBuffer({
-      textEncoder: this.morph.eos.textEncoder,
-      textDecoder: this.morph.eos.textDecoder
+      textEncoder: this.izon.rsn.textEncoder,
+      textDecoder: this.izon.rsn.textDecoder
     })
     abiDefinition.serialize(buffer, abi)
 
-    return this.morph.transact([
+    return this.izon.transact([
       {
-        account: 'eosio',
+        account: 'arisen',
         name: 'setcode',
         authorization: [
           {
@@ -130,7 +130,7 @@ export default class EosUp {
         }
       },
       {
-        account: 'eosio',
+        account: 'arisen',
         name: 'setabi',
         authorization: [
           {
@@ -147,28 +147,28 @@ export default class EosUp {
   }
 
   public async hasCodeActivePermission(account: string, contract: string) {
-    const auth = (await this.morph.eos.rpc.get_account(
+    const auth = (await this.izon.rsn.rpc.get_account(
       account
     )).permissions.find((p: any) => p.perm_name === 'active').required_auth
     const entry = auth.accounts.find(
       (a: any) =>
         a.permission.actor === contract &&
-        a.permission.permission === 'eosio.code' &&
+        a.permission.permission === 'arisen.code' &&
         a.weight >= auth.threshold
     )
     return !!entry
   }
 
   public async giveCodeActivePermission(account: string, contract: string) {
-    const auth = (await this.morph.eos.rpc.get_account(
+    const auth = (await this.izon.rsn.rpc.get_account(
       account
     )).permissions.find((p: any) => p.perm_name === 'active').required_auth
     auth.accounts.push({
-      permission: { actor: contract, permission: 'eosio.code' },
+      permission: { actor: contract, permission: 'arisen.code' },
       weight: auth.threshold
     })
-    return this.morph.transact({
-      account: 'eosio',
+    return this.izon.transact({
+      account: 'arisen',
       name: 'updateauth',
       authorization: [
         {
@@ -187,26 +187,26 @@ export default class EosUp {
 
   public async loadSystemContracts() {
     await this.setContract(
-      'eosio',
-      path.join(__dirname, '../systemContracts/eosio.bios.wasm')
+      'arisen',
+      path.join(__dirname, '../systemContracts/arisen.bios.wasm')
     )
-    await this.createAccount('eosio.token')
+    await this.createAccount('arisen.token')
     await this.setContract(
-      'eosio.token',
-      path.join(__dirname, '../systemContracts/eosio.token.wasm')
+      'arisen.token',
+      path.join(__dirname, '../systemContracts/arisen.token.wasm')
     )
-    await this.morph.transact({
-      account: 'eosio.token',
+    await this.izon.transact({
+      account: 'arisen.token',
       name: 'create',
       authorization: [
         {
-          actor: 'eosio.token',
+          actor: 'arisen.token',
           permission: 'active'
         }
       ],
       data: {
-        issuer: 'eosio.token',
-        maximum_supply: '1000000000.0000 EOS'
+        issuer: 'arisen.token',
+        maximum_supply: '1000000000.0000 RIX'
       }
     })
   }
@@ -216,10 +216,10 @@ export default class EosUp {
     amount: string,
     memo = 'Issued funds'
   ) {
-    return this.morph.transact({
-      account: 'eosio.token',
+    return this.izon.transact({
+      account: 'arisen.token',
       name: 'issue',
-      authorization: [{ actor: 'eosio.token', permission: 'active' }],
+      authorization: [{ actor: 'arisen.token', permission: 'active' }],
       data: {
         to: account,
         quantity: amount,
@@ -234,7 +234,7 @@ export default class EosUp {
     quantity: { quantity: string; contract: string },
     memo = ''
   ) {
-    return this.morph.transact({
+    return this.izon.transact({
       account: quantity.contract,
       name: 'transfer',
       authorization: from,

@@ -1,13 +1,13 @@
-#include <eosio/eosio.hpp>
+#include <arisen/arisen.hpp>
 
-using namespace eosio;
+using namespace arisen;
 
-class[[eosio::contract]] hello : public contract
+class[[arisen::contract]] hello : public contract
 {
 public:
   using contract::contract;
 
-  [[eosio::action]] void hi(name user) {
+  [[arisen::action]] void hi(name user) {
     print("Hello, ", user);
   }
 };

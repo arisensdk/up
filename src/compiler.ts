@@ -56,7 +56,7 @@ export default class Compiler extends Dockerator {
     this.command = [
       'bash',
       '-c',
-      `eosio-cpp -o ${outputFile} ${inputFile} ${
+      `arisen-cpp -o ${outputFile} ${inputFile} ${
         contract ? `-abigen -contract ${contract}` : ''
       } ${extraParams}`
     ]
